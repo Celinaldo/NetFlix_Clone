@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">NetflixClone</string>
+    <string name="cast" translatable="false">Elenco: %1$s</string>
+    <string name="similar" translatable="false">Opções semelhantes</string>
 </resources>
