@@ -16,11 +16,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.devjunior.netflixclone.model.Movie;
+import com.devjunior.netflixclone.model.MovieDetail;
+import com.devjunior.netflixclone.util.MovieDetailTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovieActivity extends AppCompatActivity {
+public class MovieActivity extends AppCompatActivity implements MovieDetailTask.MovieDetailLoader {
     private TextView txtTitle, txtDesc, txtCast;
     private RecyclerView recyclerView;
 
@@ -57,15 +59,31 @@ public class MovieActivity extends AppCompatActivity {
         txtCast.setText(getString(R.string.cast, "junio" + ",yeda" + ",joao miguel"));
 
         List<Movie> movies = new ArrayList<>();
-        for (int i = 0; i < 30 ; i++) {
+        for (int i = 0; i < 30; i++) {
             Movie movie = new Movie();
             movies.add(movie);
         }
         recyclerView.setAdapter(new MovieAdapter(movies));
-        recyclerView.setLayoutManager(new GridLayoutManager(this,3));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            int id = extras.getInt("id");
+            MovieDetailTask movieDetailTask = new MovieDetailTask(this);
+            movieDetailTask.setMovieDetailLoader(this);
+            movieDetailTask.execute("https://tiagoaguiar.co/api/netflix/1" + id + ".json");
+        }
     }
 
-        private static class MovieHolder extends RecyclerView.ViewHolder {
+    @Override
+    public void onResult(MovieDetail movieDetail) {
+        txtTitle.setText(movieDetail.getMovie().getTitle());
+        txtCast.setText(movieDetail.getMovie().getCast());
+        txtDesc.setText(movieDetail.getMovie().getDesc());
+
+    }
+
+    private static class MovieHolder extends RecyclerView.ViewHolder {
 
             final ImageView imageViewCover;
 
@@ -78,10 +96,15 @@ public class MovieActivity extends AppCompatActivity {
 
         private class MovieAdapter extends RecyclerView.Adapter<MainActivity.MovieHolder>{
 
-            private final List<Movie> movies;
+            private List<Movie> movies;
 
             private MovieAdapter(List<Movie> movies) {
                 this.movies = movies;
+            }
+
+            public void setMovies(List<Movie> movies) {
+                this.movies.clear();
+                this.movies.addAll(movies);
             }
 
             @NonNull
